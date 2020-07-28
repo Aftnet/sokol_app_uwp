@@ -65,7 +65,7 @@ namespace ScreenRotation
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
 	// 90-degree Z-rotation
 	static const XMFLOAT4X4 Rotation90(
@@ -73,7 +73,7 @@ namespace ScreenRotation
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
 	// 180-degree Z-rotation
 	static const XMFLOAT4X4 Rotation180(
@@ -81,7 +81,7 @@ namespace ScreenRotation
 		0.0f, -1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 
 	// 270-degree Z-rotation
 	static const XMFLOAT4X4 Rotation270(
@@ -89,7 +89,7 @@ namespace ScreenRotation
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-		);
+	);
 };
 
 // Constructor for DeviceResources.
@@ -109,7 +109,7 @@ DeviceResources::DeviceResources() :
 }
 
 // Configures the Direct3D device, and stores handles to it and the device context.
-void DeviceResources::CreateDeviceResources() 
+void DeviceResources::CreateDeviceResources()
 {
 	// This flag adds support for surfaces with a different color channel ordering
 	// than the API default. It is required for compatibility with Direct2D.
@@ -155,7 +155,7 @@ void DeviceResources::CreateDeviceResources()
 		device.put(),				// Returns the Direct3D device created.
 		&m_d3dFeatureLevel,			// Returns feature level of device created.
 		context.put()				// Returns the device immediate context.
-		);
+	);
 
 	if (FAILED(hr))
 	{
@@ -174,8 +174,8 @@ void DeviceResources::CreateDeviceResources()
 				device.put(),
 				&m_d3dFeatureLevel,
 				context.put()
-				)
-			);
+			)
+		);
 	}
 
 	// Store pointers to the Direct3D 11.3 API device and immediate context.
@@ -184,10 +184,10 @@ void DeviceResources::CreateDeviceResources()
 }
 
 // These resources need to be recreated every time the window size is changed.
-void DeviceResources::CreateWindowSizeDependentResources() 
+void DeviceResources::CreateWindowSizeDependentResources()
 {
 	// Clear the previous window size specific context.
-	ID3D11RenderTargetView* nullViews[] = {nullptr};
+	ID3D11RenderTargetView* nullViews[] = { nullptr };
 	m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
 	m_d3dRenderTargetView = nullptr;
 	m_d3dDepthStencilView = nullptr;
@@ -213,7 +213,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 			lround(m_d3dRenderTargetSize.Height),
 			DXGI_FORMAT_B8G8R8A8_UNORM,
 			0
-			);
+		);
 
 		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 		{
@@ -233,7 +233,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 	{
 		// Otherwise, create a new one using the same adapter as the existing Direct3D device.
 		DXGI_SCALING scaling = DisplayMetrics::SupportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
-		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
 
 		swapChainDesc.Width = lround(m_d3dRenderTargetSize.Width);		// Match the size of the window.
 		swapChainDesc.Height = lround(m_d3dRenderTargetSize.Height);
@@ -258,14 +258,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 		winrt::check_hresult(dxgiAdapter->GetParent(__uuidof(IDXGIFactory4), dxgiFactory.put_void()));
 
 		winrt::com_ptr<IDXGISwapChain1> swapChain;
-		winrt::check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(
-				m_d3dDevice.get(),
-				m_window.get().as<::IUnknown>().get(),
-				&swapChainDesc,
-				nullptr,
-				swapChain.put()
-				)
-			);
+		winrt::check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(m_d3dDevice.get(), m_window.get().as<::IUnknown>().get(), &swapChainDesc, nullptr, swapChain.put()));
 
 		m_swapChain = swapChain.as<IDXGISwapChain3>();
 
@@ -302,42 +295,26 @@ void DeviceResources::CreateWindowSizeDependentResources()
 		throw std::invalid_argument("Unexpected display rotation");
 	}
 
-	winrt::check_hresult(
-		m_swapChain->SetRotation(displayRotation)
-		);
+	winrt::check_hresult(m_swapChain->SetRotation(displayRotation));
 
 	// Create a render target view of the swap chain back buffer.
 	winrt::com_ptr<ID3D11Texture2D1> backBuffer;
-	winrt::check_hresult(
-		m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer))
-		);
+	winrt::check_hresult(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
 
-	winrt::check_hresult(
-		m_d3dDevice->CreateRenderTargetView1(
-			backBuffer.get(),
-			nullptr,
-			m_d3dRenderTargetView.put()
-			)
-		);
+	winrt::check_hresult(m_d3dDevice->CreateRenderTargetView1(backBuffer.get(), nullptr, m_d3dRenderTargetView.put()));
 
 	// Create a depth stencil view for use with 3D rendering if needed.
 	CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
-		DXGI_FORMAT_D24_UNORM_S8_UINT, 
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
 		lround(m_d3dRenderTargetSize.Width),
 		lround(m_d3dRenderTargetSize.Height),
 		1, // This depth stencil view has only one texture.
 		1, // Use a single mipmap level.
 		D3D11_BIND_DEPTH_STENCIL
-		);
+	);
 
 	winrt::com_ptr<ID3D11Texture2D1> depthStencil;
-	winrt::check_hresult(
-		m_d3dDevice->CreateTexture2D1(
-			&depthStencilDesc,
-			nullptr,
-			depthStencil.put()
-			)
-		);
+	winrt::check_hresult(m_d3dDevice->CreateTexture2D1(&depthStencilDesc, nullptr, depthStencil.put()));
 
 	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
 	winrt::check_hresult(
@@ -345,16 +322,16 @@ void DeviceResources::CreateWindowSizeDependentResources()
 			depthStencil.get(),
 			&depthStencilViewDesc,
 			m_d3dDepthStencilView.put()
-			)
-		);
-	
+		)
+	);
+
 	// Set the 3D rendering viewport to target the entire window.
 	m_screenViewport = CD3D11_VIEWPORT(
 		0.0f,
 		0.0f,
 		m_d3dRenderTargetSize.Width,
 		m_d3dRenderTargetSize.Height
-		);
+	);
 
 	m_d3dContext->RSSetViewports(1, &m_screenViewport);
 }
@@ -523,7 +500,7 @@ void DeviceResources::Trim()
 }
 
 // Present the contents of the swap chain to the screen.
-void DeviceResources::Present() 
+void DeviceResources::Present()
 {
 	// The first argument instructs DXGI to block until VSync, putting the application
 	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
