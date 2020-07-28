@@ -250,7 +250,9 @@ void DeviceResources::CreateWindowSizeDependentResources()
 
 		// This sequence obtains the DXGI factory that was used to create the Direct3D device above.
 		winrt::com_ptr<IDXGIDevice3> dxgiDevice = m_d3dDevice.as<IDXGIDevice3>();
-		winrt::com_ptr<IDXGIAdapter> dxgiAdapter = dxgiDevice.as<IDXGIAdapter>();
+
+		winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
+		winrt::check_hresult(dxgiDevice->GetAdapter(dxgiAdapter.put()));
 
 		winrt::com_ptr<IDXGIFactory4> dxgiFactory;
 		winrt::check_hresult(dxgiAdapter->GetParent(__uuidof(IDXGIFactory4), dxgiFactory.put_void()));
@@ -258,7 +260,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 		winrt::com_ptr<IDXGISwapChain1> swapChain;
 		winrt::check_hresult(dxgiFactory->CreateSwapChainForCoreWindow(
 				m_d3dDevice.get(),
-				reinterpret_cast<::IUnknown*>(&m_window.get()),
+				m_window.get().as<::IUnknown>().get(),
 				&swapChainDesc,
 				nullptr,
 				swapChain.put()
