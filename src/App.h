@@ -9,11 +9,11 @@
 #include <winrt/Windows.UI.Composition.h>
 #include <winrt/Windows.UI.Input.h>
 
-//#include "DeviceResources.h"
+#include "DeviceResources.h"
 //#include "DXAppMain.h"
 
 
-	// Main entry point for our app. Connects the app with the Windows shell and handles application lifecycle events.
+// Main entry point for our app. Connects the app with the Windows shell and handles application lifecycle events.
 struct App : winrt::implements<App, winrt::Windows::ApplicationModel::Core::IFrameworkViewSource, winrt::Windows::ApplicationModel::Core::IFrameworkView>
 {
 public:
@@ -46,7 +46,7 @@ protected:
 	void OnDisplayContentsInvalidated(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args);
 
 private:
-	//std::shared_ptr<DXApp::DeviceResources> m_deviceResources;
+	std::shared_ptr<DeviceResources> m_deviceResources;
 	//std::unique_ptr<DXAppMain> m_main;
 	bool m_windowClosed;
 	bool m_windowVisible;

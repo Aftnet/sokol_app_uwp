@@ -20,7 +20,7 @@ void App::Initialize(winrt::Windows::ApplicationModel::Core::CoreApplicationView
 
 	// At this point we have access to the device. 
 	// We can create the device-dependent resources.
-	//m_deviceResources = std::make_shared<DeviceResources>();
+	m_deviceResources = std::make_shared<DeviceResources>();
 }
 
 // Called when the CoreWindow object is created (or re-created).
@@ -36,7 +36,7 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 	currentDisplayInformation.OrientationChanged({ this, &App::OnOrientationChanged });
 	winrt::Windows::Graphics::Display::DisplayInformation::DisplayContentsInvalidated({ this, &App::OnDisplayContentsInvalidated });
 
-	//m_deviceResources->SetWindow(window);
+	m_deviceResources->SetWindow(window);
 }
 
 // Initializes scene resources, or loads a previously saved app state.
@@ -95,7 +95,7 @@ void App::OnSuspending(winrt::Windows::Foundation::IInspectable const& sender, w
 	auto deferral = args.SuspendingOperation().GetDeferral();
 	concurrency::create_task([this, deferral]()
 		{
-			//m_deviceResources->Trim();
+			m_deviceResources->Trim();
 
 			// Insert your code here.
 			deferral.Complete();
@@ -115,7 +115,7 @@ void App::OnResuming(winrt::Windows::Foundation::IInspectable const& sender, win
 
 void App::OnWindowSizeChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::WindowSizeChangedEventArgs const& args)
 {
-	//m_deviceResources->SetLogicalSize(Size(sender->Bounds.Width, sender->Bounds.Height));
+	m_deviceResources->SetLogicalSize(winrt::Windows::Foundation::Size(sender.Bounds().Width, sender.Bounds().Height));
 	//m_main->CreateWindowSizeDependentResources();
 }
 
@@ -138,19 +138,19 @@ void App::OnDpiChanged(winrt::Windows::Graphics::Display::DisplayInformation con
 	// you should always retrieve it using the GetDpi method.
 	// See DeviceResources.cpp for more details.
 
-	//m_deviceResources->SetDpi(sender->LogicalDpi);
+	m_deviceResources->SetDpi(sender.LogicalDpi());
 	//m_main->CreateWindowSizeDependentResources();
 }
 
 void App::OnOrientationChanged(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args)
 {
-	//m_deviceResources->seSetCurrentOrientation(sender->CurrentOrientation);
+	m_deviceResources->SetCurrentOrientation(sender.CurrentOrientation());
 	//m_main->CreateWindowSizeDependentResources();
 }
 
 void App::OnDisplayContentsInvalidated(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args)
 {
-	//m_deviceResources->ValidateDevice();
+	m_deviceResources->ValidateDevice();
 }
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)

@@ -24,7 +24,11 @@ set(ASSETS
 
 target_sources(${TARGETNAME} PRIVATE
     App.h
+    DeviceResources.h
+    DirectXHelper.h
+
     App.cpp
+    DeviceResources.cpp
 
     Package.appxmanifest
     ${ASSETS}
