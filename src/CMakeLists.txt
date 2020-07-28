@@ -23,6 +23,7 @@ set(ASSETS
 )
 
 target_sources(${TARGETNAME} PRIVATE
+    App.h
     App.cpp
 
     Package.appxmanifest
