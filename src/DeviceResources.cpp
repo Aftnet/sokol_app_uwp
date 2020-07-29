@@ -7,50 +7,19 @@ using namespace winrt::Windows::Graphics::Display;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::UI::Xaml::Controls;
 
-// Converts a length in device-independent pixels (DIPs) to a length in physical pixels.
-inline float ConvertDipsToPixels(float dips, float dpi)
-{
-	static const float dipsPerInch = 96.0f;
-	return floorf(dips * dpi / dipsPerInch + 0.5f); // Round to nearest integer.
-}
+// High resolution displays can require a lot of GPU and battery power to render.
+// High resolution phones, for example, may suffer from poor battery life if
+// games attempt to render at 60 frames per second at full fidelity.
+// The decision to render at full fidelity across all platforms and form factors
+// should be deliberate.
+const bool DeviceResources::m_supportHighResolutions = false;
 
-#if defined(_DEBUG)
-// Check for SDK Layer support.
-inline bool SdkLayersAvailable()
-{
-	HRESULT hr = D3D11CreateDevice(
-		nullptr,
-		D3D_DRIVER_TYPE_NULL,       // There is no need to create a real hardware device.
-		0,
-		D3D11_CREATE_DEVICE_DEBUG,  // Check for the SDK layers.
-		nullptr,                    // Any feature level will do.
-		0,
-		D3D11_SDK_VERSION,          // Always set this to D3D11_SDK_VERSION for Microsoft Store apps.
-		nullptr,                    // No need to keep the D3D device reference.
-		nullptr,                    // No need to know the feature level.
-		nullptr                     // No need to keep the D3D device context reference.
-	);
-
-	return SUCCEEDED(hr);
-}
-#endif
-
-namespace DisplayMetrics
-{
-	// High resolution displays can require a lot of GPU and battery power to render.
-	// High resolution phones, for example, may suffer from poor battery life if
-	// games attempt to render at 60 frames per second at full fidelity.
-	// The decision to render at full fidelity across all platforms and form factors
-	// should be deliberate.
-	static const bool SupportHighResolutions = false;
-
-	// The default thresholds that define a "high resolution" display. If the thresholds
-	// are exceeded and SupportHighResolutions is false, the dimensions will be scaled
-	// by 50%.
-	static const float DpiThreshold = 192.0f;		// 200% of standard desktop display.
-	static const float WidthThreshold = 1920.0f;	// 1080p width.
-	static const float HeightThreshold = 1080.0f;	// 1080p height.
-};
+// The default thresholds that define a "high resolution" display. If the thresholds
+// are exceeded and SupportHighResolutions is false, the dimensions will be scaled
+// by 50%.
+const float DeviceResources::m_dpiThreshold = 192.0f;		// 200% of standard desktop display.
+const float DeviceResources::m_widthThreshold = 1920.0f;	// 1080p width.
+const float DeviceResources::m_heightThreshold = 1080.0f;	// 1080p height.
 
 
 const DirectX::XMFLOAT4X4 DeviceResources::m_rotation0(
@@ -225,7 +194,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 	else
 	{
 		// Otherwise, create a new one using the same adapter as the existing Direct3D device.
-		DXGI_SCALING scaling = DisplayMetrics::SupportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
+		DXGI_SCALING scaling = m_supportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
 
 		swapChainDesc.Width = lround(m_d3dRenderTargetSize.Width);		// Match the size of the window.
@@ -336,7 +305,7 @@ void DeviceResources::UpdateRenderTargetSize()
 
 	// To improve battery life on high resolution devices, render to a smaller render target
 	// and allow the GPU to scale the output when it is presented.
-	if (!DisplayMetrics::SupportHighResolutions && m_dpi > DisplayMetrics::DpiThreshold)
+	if (!m_supportHighResolutions && m_dpi > m_dpiThreshold)
 	{
 		float width = ConvertDipsToPixels(m_logicalSize.Width, m_dpi);
 		float height = ConvertDipsToPixels(m_logicalSize.Height, m_dpi);
@@ -344,7 +313,7 @@ void DeviceResources::UpdateRenderTargetSize()
 		// When the device is in portrait orientation, height > width. Compare the
 		// larger dimension against the width threshold and the smaller dimension
 		// against the height threshold.
-		if (max(width, height) > DisplayMetrics::WidthThreshold && min(width, height) > DisplayMetrics::HeightThreshold)
+		if (max(width, height) > m_widthThreshold && min(width, height) > m_heightThreshold)
 		{
 			// To scale the app we change the effective DPI. Logical size does not change.
 			m_effectiveDpi /= 2.0f;
@@ -574,4 +543,34 @@ DXGI_MODE_ROTATION DeviceResources::ComputeDisplayRotation()
 		break;
 	}
 	return rotation;
+}
+
+// Converts a length in device-independent pixels (DIPs) to a length in physical pixels.
+inline float DeviceResources::ConvertDipsToPixels(float dips, float dpi)
+{
+	static const float dipsPerInch = 96.0f;
+	return floorf(dips * dpi / dipsPerInch + 0.5f); // Round to nearest integer.
+}
+
+// Check for SDK Layer support.
+inline bool DeviceResources::SdkLayersAvailable()
+{
+#if defined(_DEBUG)
+	HRESULT hr = D3D11CreateDevice(
+		nullptr,
+		D3D_DRIVER_TYPE_NULL,       // There is no need to create a real hardware device.
+		0,
+		D3D11_CREATE_DEVICE_DEBUG,  // Check for the SDK layers.
+		nullptr,                    // Any feature level will do.
+		0,
+		D3D11_SDK_VERSION,          // Always set this to D3D11_SDK_VERSION for Microsoft Store apps.
+		nullptr,                    // No need to keep the D3D device reference.
+		nullptr,                    // No need to know the feature level.
+		nullptr                     // No need to keep the D3D device context reference.
+	);
+
+	return SUCCEEDED(hr);
+#else
+	return false;
+#endif
 }

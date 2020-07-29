@@ -8,7 +8,6 @@
 #include <d3d11_3.h>
 #include <DirectXMath.h>
 
-
 // Controls all the DirectX device resources.
 class DeviceResources
 {
@@ -49,10 +48,24 @@ public:
 	DirectX::XMFLOAT4X4 GetOrientationTransform3D() const { return m_orientationTransform3D; }
 
 private:
+	// DPI scaling behavior constants
+	static const bool m_supportHighResolutions;
+	static const float m_dpiThreshold;
+	static const float m_widthThreshold;
+	static const float m_heightThreshold;
+
+	// Swapchain Rotation Matrices (Z-rotation)
+	static const DirectX::XMFLOAT4X4 m_rotation0;
+	static const DirectX::XMFLOAT4X4 m_rotation90;
+	static const DirectX::XMFLOAT4X4 m_rotation180;
+	static const DirectX::XMFLOAT4X4 m_rotation270;
+
 	void CreateDeviceResources();
 	void CreateWindowSizeDependentResources();
 	void UpdateRenderTargetSize();
 	DXGI_MODE_ROTATION ComputeDisplayRotation();
+	float ConvertDipsToPixels(float dips, float dpi);
+	bool SdkLayersAvailable();
 
 	// Direct3D objects.
 	winrt::com_ptr<ID3D11Device3> m_d3dDevice;
@@ -84,10 +97,4 @@ private:
 
 	// The IDeviceNotify can be held directly as it owns the DeviceResources.
 	IDeviceNotify* m_deviceNotify;
-
-	// Swapchain Rotation Matrices (Z-rotation)
-	static const DirectX::XMFLOAT4X4 m_rotation0;
-	static const DirectX::XMFLOAT4X4 m_rotation90;
-	static const DirectX::XMFLOAT4X4 m_rotation180;
-	static const DirectX::XMFLOAT4X4 m_rotation270;
 };
