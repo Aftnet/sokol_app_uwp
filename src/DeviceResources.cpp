@@ -1,11 +1,7 @@
 ﻿#include "DeviceResources.h"
-#include "DirectXHelper.h"
 
 #include <winrt/Windows.UI.Xaml.Controls.h>
 
-#include <DirectXMath.h>
-
-using namespace DirectX;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Graphics::Display;
 using namespace winrt::Windows::UI::Core;
@@ -56,41 +52,38 @@ namespace DisplayMetrics
 	static const float HeightThreshold = 1080.0f;	// 1080p height.
 };
 
-// Constants used to calculate screen rotations
-namespace ScreenRotation
-{
-	// 0-degree Z-rotation
-	static const XMFLOAT4X4 Rotation0(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
 
-	// 90-degree Z-rotation
-	static const XMFLOAT4X4 Rotation90(
-		0.0f, 1.0f, 0.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+const DirectX::XMFLOAT4X4 DeviceResources::m_rotation0(
+	1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, 1.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f
+);
 
-	// 180-degree Z-rotation
-	static const XMFLOAT4X4 Rotation180(
-		-1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+// 90-degree Z-rotation
+const DirectX::XMFLOAT4X4 DeviceResources::m_rotation90(
+	0.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f
+);
 
-	// 270-degree Z-rotation
-	static const XMFLOAT4X4 Rotation270(
-		0.0f, -1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-};
+// 180-degree Z-rotation
+const DirectX::XMFLOAT4X4 DeviceResources::m_rotation180(
+	-1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, -1.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f
+);
+
+// 270-degree Z-rotation
+const DirectX::XMFLOAT4X4 DeviceResources::m_rotation270(
+	0.0f, -1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f
+);
+
 
 // Constructor for DeviceResources.
 DeviceResources::DeviceResources() :
@@ -276,19 +269,19 @@ void DeviceResources::CreateWindowSizeDependentResources()
 	switch (displayRotation)
 	{
 	case DXGI_MODE_ROTATION_IDENTITY:
-		m_orientationTransform3D = ScreenRotation::Rotation0;
+		m_orientationTransform3D = m_rotation0;
 		break;
 
 	case DXGI_MODE_ROTATION_ROTATE90:
-		m_orientationTransform3D = ScreenRotation::Rotation270;
+		m_orientationTransform3D = m_rotation270;
 		break;
 
 	case DXGI_MODE_ROTATION_ROTATE180:
-		m_orientationTransform3D = ScreenRotation::Rotation180;
+		m_orientationTransform3D = m_rotation180;
 		break;
 
 	case DXGI_MODE_ROTATION_ROTATE270:
-		m_orientationTransform3D = ScreenRotation::Rotation90;
+		m_orientationTransform3D = m_rotation90;
 		break;
 
 	default:

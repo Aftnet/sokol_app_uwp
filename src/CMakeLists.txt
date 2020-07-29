@@ -25,7 +25,6 @@ set(ASSETS
 target_sources(${TARGETNAME} PRIVATE
     App.h
     DeviceResources.h
-    DirectXHelper.h
     Renderer.h
     sokol/hhm.h
     sokol/sokol_app.h

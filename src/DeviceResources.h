@@ -6,18 +6,20 @@
 
 #include <dxgi1_4.h>
 #include <d3d11_3.h>
+#include <DirectXMath.h>
 
-// Provides an interface for an application that owns DeviceResources to be notified of the device being lost or created.
-interface IDeviceNotify
-{
-	virtual void OnDeviceLost() = 0;
-	virtual void OnDeviceRestored() = 0;
-};
 
 // Controls all the DirectX device resources.
 class DeviceResources
 {
 public:
+	// Provides an interface for an application that owns DeviceResources to be notified of the device being lost or created.
+	interface IDeviceNotify
+	{
+		virtual void OnDeviceLost() = 0;
+		virtual void OnDeviceRestored() = 0;
+	};
+
 	DeviceResources();
 	void SetWindow(winrt::Windows::UI::Core::CoreWindow const& window);
 	void SetLogicalSize(winrt::Windows::Foundation::Size logicalSize);
@@ -82,4 +84,10 @@ private:
 
 	// The IDeviceNotify can be held directly as it owns the DeviceResources.
 	IDeviceNotify* m_deviceNotify;
+
+	// Swapchain Rotation Matrices (Z-rotation)
+	static const DirectX::XMFLOAT4X4 m_rotation0;
+	static const DirectX::XMFLOAT4X4 m_rotation90;
+	static const DirectX::XMFLOAT4X4 m_rotation180;
+	static const DirectX::XMFLOAT4X4 m_rotation270;
 };
