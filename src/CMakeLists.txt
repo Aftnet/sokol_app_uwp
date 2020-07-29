@@ -34,7 +34,9 @@ target_sources(${TARGETNAME} PRIVATE
     App.cpp
     DeviceResources.cpp
     Renderer.cpp
+    SokolMain.c
     sokol/sokol.c
+    sokol/sokol_uwp_impl.cpp
 
     Package.appxmanifest
     ${ASSETS}

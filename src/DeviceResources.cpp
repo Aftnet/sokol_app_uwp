@@ -1,12 +1,5 @@
 ﻿#include "DeviceResources.h"
 
-#include <winrt/Windows.UI.Xaml.Controls.h>
-
-using namespace winrt::Windows::Foundation;
-using namespace winrt::Windows::Graphics::Display;
-using namespace winrt::Windows::UI::Core;
-using namespace winrt::Windows::UI::Xaml::Controls;
-
 // High resolution displays can require a lot of GPU and battery power to render.
 // High resolution phones, for example, may suffer from poor battery life if
 // games attempt to render at 60 frames per second at full fidelity.
@@ -61,8 +54,8 @@ DeviceResources::DeviceResources() :
 	m_d3dRenderTargetSize(),
 	m_outputSize(),
 	m_logicalSize(),
-	m_nativeOrientation(DisplayOrientations::None),
-	m_currentOrientation(DisplayOrientations::None),
+	m_nativeOrientation(winrt::Windows::Graphics::Display::DisplayOrientations::None),
+	m_currentOrientation(winrt::Windows::Graphics::Display::DisplayOrientations::None),
 	m_dpi(-1.0f),
 	m_effectiveDpi(-1.0f),
 	m_deviceNotify(nullptr)
@@ -330,9 +323,9 @@ void DeviceResources::UpdateRenderTargetSize()
 }
 
 // This method is called when the CoreWindow is created (or re-created).
-void DeviceResources::SetWindow(CoreWindow const& window)
+void DeviceResources::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 {
-	DisplayInformation const& currentDisplayInformation = DisplayInformation::GetForCurrentView();
+	auto currentDisplayInformation = winrt::Windows::Graphics::Display::DisplayInformation::GetForCurrentView();
 
 	m_window = window;
 	m_logicalSize = winrt::Windows::Foundation::Size(window.Bounds().Width, window.Bounds().Height);
@@ -369,7 +362,7 @@ void DeviceResources::SetDpi(float dpi)
 }
 
 // This method is called in the event handler for the OrientationChanged event.
-void DeviceResources::SetCurrentOrientation(DisplayOrientations currentOrientation)
+void DeviceResources::SetCurrentOrientation(winrt::Windows::Graphics::Display::DisplayOrientations currentOrientation)
 {
 	if (m_currentOrientation != currentOrientation)
 	{
@@ -500,43 +493,43 @@ DXGI_MODE_ROTATION DeviceResources::ComputeDisplayRotation()
 	// the DisplayOrientations enum has other values.
 	switch (m_nativeOrientation)
 	{
-	case DisplayOrientations::Landscape:
+	case winrt::Windows::Graphics::Display::DisplayOrientations::Landscape:
 		switch (m_currentOrientation)
 		{
-		case DisplayOrientations::Landscape:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::Landscape:
 			rotation = DXGI_MODE_ROTATION_IDENTITY;
 			break;
 
-		case DisplayOrientations::Portrait:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::Portrait:
 			rotation = DXGI_MODE_ROTATION_ROTATE270;
 			break;
 
-		case DisplayOrientations::LandscapeFlipped:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::LandscapeFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE180;
 			break;
 
-		case DisplayOrientations::PortraitFlipped:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::PortraitFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE90;
 			break;
 		}
 		break;
 
-	case DisplayOrientations::Portrait:
+	case winrt::Windows::Graphics::Display::DisplayOrientations::Portrait:
 		switch (m_currentOrientation)
 		{
-		case DisplayOrientations::Landscape:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::Landscape:
 			rotation = DXGI_MODE_ROTATION_ROTATE90;
 			break;
 
-		case DisplayOrientations::Portrait:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::Portrait:
 			rotation = DXGI_MODE_ROTATION_IDENTITY;
 			break;
 
-		case DisplayOrientations::LandscapeFlipped:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::LandscapeFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE270;
 			break;
 
-		case DisplayOrientations::PortraitFlipped:
+		case winrt::Windows::Graphics::Display::DisplayOrientations::PortraitFlipped:
 			rotation = DXGI_MODE_ROTATION_ROTATE180;
 			break;
 		}
