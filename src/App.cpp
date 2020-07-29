@@ -42,10 +42,10 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 // Initializes scene resources, or loads a previously saved app state.
 void App::Load(winrt::hstring const& entryPoint)
 {
-	/*if (m_main == nullptr)
+	if (m_renderer == nullptr)
 	{
-		m_main = std::unique_ptr<DXAppMain>(new DXAppMain(m_deviceResources));
-	}*/
+		m_renderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
+	}
 }
 
 // This method is called after the window becomes active.
@@ -56,13 +56,11 @@ void App::Run()
 		if (m_windowVisible)
 		{
 			winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(winrt::Windows::UI::Core::CoreProcessEventsOption::ProcessAllIfPresent);
-
-			/*m_main->Update();
-
-			if (m_main->Render())
+			
+			if (m_renderer->Render())
 			{
 				m_deviceResources->Present();
-			}*/
+			}
 		}
 		else
 		{

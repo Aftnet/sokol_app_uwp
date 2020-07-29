@@ -10,7 +10,7 @@
 #include <winrt/Windows.UI.Input.h>
 
 #include "DeviceResources.h"
-//#include "DXAppMain.h"
+#include "Renderer.h"
 
 
 // Main entry point for our app. Connects the app with the Windows shell and handles application lifecycle events.
@@ -47,7 +47,7 @@ protected:
 
 private:
 	std::shared_ptr<DeviceResources> m_deviceResources;
-	//std::unique_ptr<DXAppMain> m_main;
+	std::unique_ptr<Renderer> m_renderer;
 	bool m_windowClosed;
 	bool m_windowVisible;
 };
