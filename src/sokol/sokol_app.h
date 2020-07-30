@@ -6044,9 +6044,6 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 // Initializes scene resources, or loads a previously saved app state.
 void App::Load(winrt::hstring const& entryPoint)
 {
-    auto appView = winrt::Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
-    appView.Title(_sapp.window_title_wide);
-
     if (m_renderer == nullptr)
     {
         m_renderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
@@ -6085,6 +6082,12 @@ void App::Uninitialize()
 
 void App::OnActivated(winrt::Windows::ApplicationModel::Core::CoreApplicationView const& applicationView, winrt::Windows::ApplicationModel::Activation::IActivatedEventArgs const& args)
 {
+    auto appView = winrt::Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
+    auto targetSize = winrt::Windows::Foundation::Size(_sapp.desc.width, _sapp.desc.height);
+    appView.SetPreferredMinSize(targetSize);
+    appView.TryResizeView(targetSize);
+    appView.Title(_sapp.window_title_wide);
+
     // Run() won't start until the CoreWindow is activated.
     winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Activate();
 }
