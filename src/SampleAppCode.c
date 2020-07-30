@@ -208,7 +208,7 @@ sapp_desc sokol_main(int argc, char* argv[])
 {
     return (sapp_desc)
     {
-        .width = 640,
+        .width = 800,
         .height = 480,
         .high_dpi = false,
         .fullscreen = false,
