@@ -32,7 +32,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="App">
       <uap:VisualElements
-        DisplayName="DXApp2222"
+        DisplayName="UWP Sample app"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="DXApp"
