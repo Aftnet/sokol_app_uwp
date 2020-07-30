@@ -5979,7 +5979,6 @@ inline bool DeviceResources::SdkLayersAvailable()
 
 Renderer::Renderer(const std::shared_ptr<DeviceResources>& deviceResources)
 {
-    _sapp_call_init();
 }
 
 Renderer::~Renderer()
@@ -5989,7 +5988,7 @@ Renderer::~Renderer()
 
 bool Renderer::Render()
 {
-    _sapp_call_frame();
+    _sapp_frame();
     return true;
 }
 
