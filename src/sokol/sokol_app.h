@@ -5603,6 +5603,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
         winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
 
         // Setup Sokol Context
+        _sapp.sample_count = swapChainDesc.SampleDesc.Count;
         winrt::check_hresult(swapChain->GetDesc(&_sapp.d3d11.swap_chain_desc));
         _sapp.d3d11.swap_chain = m_swapChain.as<IDXGISwapChain3>().detach();
     }
@@ -5673,11 +5674,18 @@ void DeviceResources::CreateWindowSizeDependentResources()
 
     m_d3dContext->RSSetViewports(1, &m_screenViewport);
 
+    // Set sokol window and framebuffer sizes
+    _sapp.window_width = m_logicalSize.Width;
+    _sapp.window_height = m_logicalSize.Height;
+    _sapp.framebuffer_width = lround(m_d3dRenderTargetSize.Width);
+    _sapp.framebuffer_height = lround(m_d3dRenderTargetSize.Height);
+
     // Setup Sokol Context
     _sapp.d3d11.rt = m_d3dRenderTarget.as<ID3D11Texture2D>().get();
     _sapp.d3d11.rtv = m_d3dRenderTargetView.as<ID3D11RenderTargetView>().get();
     _sapp.d3d11.ds = m_d3dDepthStencil.as<ID3D11Texture2D>().get();
     _sapp.d3d11.dsv = m_d3dDepthStencilView.get();
+
     // Sokol app is now valid
     _sapp.valid = true;
 }
