@@ -5274,6 +5274,7 @@ private:
     winrt::com_ptr<IDXGISwapChain3> m_swapChain;
 
     // Direct3D rendering objects. Required for 3D.
+    winrt::com_ptr<ID3D11Texture2D1> m_d3dRenderTarget;
     winrt::com_ptr<ID3D11RenderTargetView1> m_d3dRenderTargetView;
     winrt::com_ptr<ID3D11Texture2D1> m_d3dDepthStencil;
     winrt::com_ptr<ID3D11DepthStencilView> m_d3dDepthStencilView;
@@ -5522,6 +5523,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
     // Clear the previous window size specific context.
     ID3D11RenderTargetView* nullViews[] = { nullptr };
     m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+    m_d3dRenderTarget = nullptr;
     m_d3dRenderTargetView = nullptr;
     m_d3dDepthStencilView = nullptr;
     m_d3dDepthStencil = nullptr;
@@ -5636,10 +5638,9 @@ void DeviceResources::CreateWindowSizeDependentResources()
     winrt::check_hresult(m_swapChain->SetRotation(displayRotation));
 
     // Create a render target view of the swap chain back buffer.
-    winrt::com_ptr<ID3D11Texture2D1> backBuffer;
-    winrt::check_hresult(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+    winrt::check_hresult(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&m_d3dRenderTarget)));
 
-    winrt::check_hresult(m_d3dDevice->CreateRenderTargetView1(backBuffer.get(), nullptr, m_d3dRenderTargetView.put()));
+    winrt::check_hresult(m_d3dDevice->CreateRenderTargetView1(m_d3dRenderTarget.get(), nullptr, m_d3dRenderTargetView.put()));
 
     // Create a depth stencil view for use with 3D rendering if needed.
     CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
@@ -5673,9 +5674,9 @@ void DeviceResources::CreateWindowSizeDependentResources()
     m_d3dContext->RSSetViewports(1, &m_screenViewport);
 
     // Setup Sokol Context
-    _sapp.d3d11.rt = backBuffer.as<ID3D11Texture2D>().detach();
-    _sapp.d3d11.rtv = m_d3dRenderTargetView.as<ID3D11RenderTargetView>().detach();
-    _sapp.d3d11.ds = m_d3dDepthStencil.as<ID3D11Texture2D>().detach();
+    _sapp.d3d11.rt = m_d3dRenderTarget.as<ID3D11Texture2D>().get();
+    _sapp.d3d11.rtv = m_d3dRenderTargetView.as<ID3D11RenderTargetView>().get();
+    _sapp.d3d11.ds = m_d3dDepthStencil.as<ID3D11Texture2D>().get();
     _sapp.d3d11.dsv = m_d3dDepthStencilView.get();
     // Sokol app is now valid
     _sapp.valid = true;
