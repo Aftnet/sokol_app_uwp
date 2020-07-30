@@ -4,6 +4,10 @@
 
 #include "sokol/hhm.h"
 
+//Only for OutputDebugStringA
+#include <Windows.h>
+
+
 /* a uniform block with a model-view-projection matrix */
 typedef struct {
     hmm_mat4 mvp;
@@ -166,7 +170,38 @@ void frame_handler()
 
 void event_handler(sapp_event* event)
 {
+    if (event->type == SAPP_EVENTTYPE_KEY_DOWN)
+    {
+        switch (event->key_code)
+        {
+        case SAPP_KEYCODE_F:
+            if (!sapp_is_fullscreen())
+            {
+                sapp_toggle_fullscreen();
+            }
+            break;
+        case SAPP_KEYCODE_ESCAPE:
+            if (sapp_is_fullscreen())
+            {
+                sapp_toggle_fullscreen();
+            }
+            break;
+        case SAPP_KEYCODE_T:
+            if (!event->key_repeat)
+            {
+                sapp_toggle_fullscreen();
+            }
+            break;
+        case SAPP_KEYCODE_Q:
+            sapp_request_quit();
+            break;
+        }
+    }
+}
 
+void error_handler(const char* message)
+{
+    OutputDebugStringA(message);
 }
 
 sapp_desc sokol_main(int argc, char* argv[])
@@ -176,6 +211,8 @@ sapp_desc sokol_main(int argc, char* argv[])
         .width = 640,
         .height = 480,
         .high_dpi = false,
+        .fullscreen = true,
+        .window_title = "Sokol_app sample",
         .init_cb = init_handler,
         .frame_cb = frame_handler,
         .cleanup_cb = cleanup_handler,
