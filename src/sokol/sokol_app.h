@@ -1193,6 +1193,7 @@ inline int sapp_run(const sapp_desc& desc) { return sapp_run(&desc); }
     #include <winrt/Windows.UI.Core.h>
     #include <winrt/Windows.UI.Composition.h>
     #include <winrt/Windows.UI.Input.h>
+    #include <winrt/Windows.UI.ViewManagement.h>
     #include <ppltasks.h>
 
     #include <dxgi1_4.h>
@@ -4164,7 +4165,25 @@ _SOKOL_PRIVATE const _sapp_gl_fbconfig* _sapp_gl_choose_fbconfig(const _sapp_gl_
 }
 #endif
 
-/*== WINDOWS ==================================================================*/
+/*== WINDOWS DESKTOP and UWP====================================================*/
+#if defined(_SAPP_WIN32) || defined(_SAPP_UWP)
+_SOKOL_PRIVATE bool _sapp_win32_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
+    SOKOL_ASSERT(src && dst && (dst_num_bytes > 1));
+    memset(dst, 0, dst_num_bytes);
+    const int dst_chars = dst_num_bytes / sizeof(wchar_t);
+    const int dst_needed = MultiByteToWideChar(CP_UTF8, 0, src, -1, 0, 0);
+    if ((dst_needed > 0) && (dst_needed < dst_chars)) {
+        MultiByteToWideChar(CP_UTF8, 0, src, -1, dst, dst_chars);
+        return true;
+    }
+    else {
+        /* input string doesn't fit into destination buffer */
+        return false;
+    }
+}
+#endif // _SAPP_WIN32 || _SAPP_UWP
+
+/*== WINDOWS DESKTOP===========================================================*/
 #if defined(_SAPP_WIN32)
 
 #if defined(SOKOL_D3D11)
@@ -4503,21 +4522,6 @@ _SOKOL_PRIVATE void _sapp_wgl_swap_buffers(void) {
     SwapBuffers(_sapp.win32.dc);
 }
 #endif /* SOKOL_GLCORE33 */
-
-_SOKOL_PRIVATE bool _sapp_win32_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
-    SOKOL_ASSERT(src && dst && (dst_num_bytes > 1));
-    memset(dst, 0, dst_num_bytes);
-    const int dst_chars = dst_num_bytes / sizeof(wchar_t);
-    const int dst_needed = MultiByteToWideChar(CP_UTF8, 0, src, -1, 0, 0);
-    if ((dst_needed > 0) && (dst_needed < dst_chars)) {
-        MultiByteToWideChar(CP_UTF8, 0, src, -1, dst, dst_chars);
-        return true;
-    }
-    else {
-        /* input string doesn't fit into destination buffer */
-        return false;
-    }
-}
 
 _SOKOL_PRIVATE bool _sapp_win32_wide_to_utf8(const wchar_t* src, char* dst, int dst_num_bytes) {
     SOKOL_ASSERT(src && dst && (dst_num_bytes > 1));
@@ -6040,6 +6044,9 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 // Initializes scene resources, or loads a previously saved app state.
 void App::Load(winrt::hstring const& entryPoint)
 {
+    auto appView = winrt::Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
+    appView.Title(_sapp.window_title_wide);
+
     if (m_renderer == nullptr)
     {
         m_renderer = std::unique_ptr<Renderer>(new Renderer(m_deviceResources));
@@ -6153,7 +6160,7 @@ _SOKOL_PRIVATE void _sapp_uwp_run(const sapp_desc* desc)
 {
     _sapp_init_state(desc);
     //_sapp_win32_init_keytable();
-    //_sapp_win32_utf8_to_wide(_sapp.window_title, _sapp.window_title_wide, sizeof(_sapp.window_title_wide));
+    _sapp_win32_utf8_to_wide(_sapp.window_title, _sapp.window_title_wide, sizeof(_sapp.window_title_wide));
     //_sapp_win32_init_dpi();
 
     winrt::Windows::ApplicationModel::Core::CoreApplication::Run(winrt::make<App>());
