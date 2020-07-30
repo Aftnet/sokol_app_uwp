@@ -2,6 +2,13 @@
 
 UWP implementation of sokol_app and sample app (spinning cube from sokol_samples, all in `SampleAppCode.c`) to test/develop it.
 
+Key controls
+
+- `F` to enter fullscreen
+- `T` to toggle fullscreen on or off
+- `Esc` to exit fullscreen
+- `Q` to exit (desktop only, UWP apps are not meant to close programmatically)
+
 Can be built with CMake for UWP and Desktop (need to clean build directory and configure/generate again) by:
 
 - Setting `CMAKE_SYSTEM_NAME` to `WindowsStore` and `CMAKE_SYSTEM_VERSION` to `10`for UWP
