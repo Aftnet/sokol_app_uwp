@@ -998,6 +998,7 @@ inline int sapp_run(const sapp_desc& desc) { return sapp_run(&desc); }
     #endif
 #elif defined(_WIN32)
     /* Windows (D3D11 or GL) */
+    #include <winapifamily.h>
     #if (defined(WINAPI_FAMILY_PARTITION) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP))
         #define _SAPP_UWP (1)
         #if !defined(SOKOL_D3D11)
