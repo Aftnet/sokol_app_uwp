@@ -23,21 +23,14 @@ set(ASSETS
 )
 
 target_sources(${TARGETNAME} PRIVATE
-    #App.h
-    #DeviceResources.h
-    #Renderer.h
     sokol/hhm.h
     sokol/sokol_app.h
     sokol/sokol_gfx.h
     sokol/sokol_glue.h
 
-    #App.cpp
-    #DeviceResources.cpp
-    #Renderer.cpp
-    SokolMain.c
+    SampleAppCode.c
     sokol/sokol.c
     sokol/sokol.cpp
-    #sokol/sokol_uwp_impl.cpp
 
     Package.appxmanifest
     ${ASSETS}
