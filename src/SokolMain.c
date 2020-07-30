@@ -4,8 +4,9 @@
 
 void init_handler()
 {
-    sg_context_desc app_context = sapp_sgcontext();
-    sg_setup(&app_context);
+    sg_desc desc = { 0 };
+    desc.context = sapp_sgcontext();
+    sg_setup(&desc);
 }
 
 void frame_handler()

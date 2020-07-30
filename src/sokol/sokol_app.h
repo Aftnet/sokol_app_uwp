@@ -5220,6 +5220,7 @@ public:
     };
 
     DeviceResources();
+    ~DeviceResources();
     void SetWindow(winrt::Windows::UI::Core::CoreWindow const& window);
     void SetLogicalSize(winrt::Windows::Foundation::Size logicalSize);
     void SetCurrentOrientation(winrt::Windows::Graphics::Display::DisplayOrientations currentOrientation);
@@ -5274,6 +5275,7 @@ private:
 
     // Direct3D rendering objects. Required for 3D.
     winrt::com_ptr<ID3D11RenderTargetView1> m_d3dRenderTargetView;
+    winrt::com_ptr<ID3D11Texture2D1> m_d3dDepthStencil;
     winrt::com_ptr<ID3D11DepthStencilView> m_d3dDepthStencilView;
     D3D11_VIEWPORT m_screenViewport;
 
@@ -5422,6 +5424,13 @@ DeviceResources::DeviceResources() :
     CreateDeviceResources();
 }
 
+DeviceResources::~DeviceResources()
+{
+    // Cleanup Sokol Context
+    _sapp.d3d11.device = nullptr;
+    _sapp.d3d11.device_context = nullptr;
+}
+
 // Configures the Direct3D device, and stores handles to it and the device context.
 void DeviceResources::CreateDeviceResources()
 {
@@ -5495,16 +5504,27 @@ void DeviceResources::CreateDeviceResources()
     // Store pointers to the Direct3D 11.3 API device and immediate context.
     m_d3dDevice = device.as<ID3D11Device3>();
     m_d3dContext = context.as<ID3D11DeviceContext3>();
+
+    // Setup Sokol Context
+    _sapp.d3d11.device = m_d3dDevice.get();
+    _sapp.d3d11.device_context = m_d3dContext.get();
 }
 
 // These resources need to be recreated every time the window size is changed.
 void DeviceResources::CreateWindowSizeDependentResources()
 {
+    // Cleanup Sokol Context
+    _sapp.d3d11.rt = nullptr;
+    _sapp.d3d11.rtv = nullptr;
+    _sapp.d3d11.ds = nullptr;
+    _sapp.d3d11.dsv = nullptr;
+
     // Clear the previous window size specific context.
     ID3D11RenderTargetView* nullViews[] = { nullptr };
     m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
     m_d3dRenderTargetView = nullptr;
     m_d3dDepthStencilView = nullptr;
+    m_d3dDepthStencil = nullptr;
     m_d3dContext->Flush1(D3D11_CONTEXT_TYPE_ALL, nullptr);
 
     UpdateRenderTargetSize();
@@ -5579,6 +5599,10 @@ void DeviceResources::CreateWindowSizeDependentResources()
         // Ensure that DXGI does not queue more than one frame at a time. This both reduces latency and
         // ensures that the application will only render after each VSync, minimizing power consumption.
         winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
+
+        // Setup Sokol Context
+        winrt::check_hresult(swapChain->GetDesc(&_sapp.d3d11.swap_chain_desc));
+        _sapp.d3d11.swap_chain = m_swapChain.as<IDXGISwapChain3>().detach();
     }
 
     // Set the proper orientation for the swap chain, and generate 2D and
@@ -5627,13 +5651,12 @@ void DeviceResources::CreateWindowSizeDependentResources()
         D3D11_BIND_DEPTH_STENCIL
     );
 
-    winrt::com_ptr<ID3D11Texture2D1> depthStencil;
-    winrt::check_hresult(m_d3dDevice->CreateTexture2D1(&depthStencilDesc, nullptr, depthStencil.put()));
+    winrt::check_hresult(m_d3dDevice->CreateTexture2D1(&depthStencilDesc, nullptr, m_d3dDepthStencil.put()));
 
     CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
     winrt::check_hresult(
         m_d3dDevice->CreateDepthStencilView(
-            depthStencil.get(),
+            m_d3dDepthStencil.get(),
             &depthStencilViewDesc,
             m_d3dDepthStencilView.put()
         )
@@ -5648,6 +5671,14 @@ void DeviceResources::CreateWindowSizeDependentResources()
     );
 
     m_d3dContext->RSSetViewports(1, &m_screenViewport);
+
+    // Setup Sokol Context
+    _sapp.d3d11.rt = backBuffer.as<ID3D11Texture2D>().detach();
+    _sapp.d3d11.rtv = m_d3dRenderTargetView.as<ID3D11RenderTargetView>().detach();
+    _sapp.d3d11.ds = m_d3dDepthStencil.as<ID3D11Texture2D>().detach();
+    _sapp.d3d11.dsv = m_d3dDepthStencilView.get();
+    // Sokol app is now valid
+    _sapp.valid = true;
 }
 
 // Determine the dimensions of the render target and whether it will be scaled down.
