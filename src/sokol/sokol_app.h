@@ -5251,7 +5251,7 @@ public:
 
 private:
     // DPI scaling behavior constants
-    static const bool m_supportHighResolutions;
+    static bool m_supportHighResolutions;
     static const float m_dpiThreshold;
     static const float m_widthThreshold;
     static const float m_heightThreshold;
@@ -5368,12 +5368,12 @@ private:
 // games attempt to render at 60 frames per second at full fidelity.
 // The decision to render at full fidelity across all platforms and form factors
 // should be deliberate.
-const bool DeviceResources::m_supportHighResolutions = false;
+bool DeviceResources::m_supportHighResolutions = true;
 
 // The default thresholds that define a "high resolution" display. If the thresholds
 // are exceeded and SupportHighResolutions is false, the dimensions will be scaled
 // by 50%.
-const float DeviceResources::m_dpiThreshold = 192.0f;		// 200% of standard desktop display.
+const float DeviceResources::m_dpiThreshold = 192.0;		// 200% of standard desktop display.
 const float DeviceResources::m_widthThreshold = 1920.0f;	// 1080p width.
 const float DeviceResources::m_heightThreshold = 1080.0f;	// 1080p height.
 
@@ -5515,6 +5515,8 @@ void DeviceResources::CreateDeviceResources()
 // These resources need to be recreated every time the window size is changed.
 void DeviceResources::CreateWindowSizeDependentResources()
 {
+    m_supportHighResolutions = _sapp.desc.high_dpi;
+
     // Cleanup Sokol Context
     _sapp.d3d11.rt = nullptr;
     _sapp.d3d11.rtv = nullptr;

@@ -175,7 +175,7 @@ sapp_desc sokol_main(int argc, char* argv[])
     {
         .width = 640,
         .height = 480,
-        .high_dpi = true,
+        .high_dpi = false,
         .init_cb = init_handler,
         .frame_cb = frame_handler,
         .cleanup_cb = cleanup_handler,
