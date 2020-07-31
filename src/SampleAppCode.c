@@ -210,7 +210,7 @@ sapp_desc sokol_main(int argc, char* argv[])
     {
         .width = 800,
         .height = 600,
-        .high_dpi = false,
+        .high_dpi = true,
         .fullscreen = false,
         .window_title = "Sokol_app sample",
         .init_cb = init_handler,

@@ -5218,12 +5218,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 #if defined(_SAPP_UWP)
 
 // Helper functions
-_SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, int vk, bool repeat) {
-    if (_sapp_events_enabled() && (vk < SAPP_MAX_KEYCODES)) {
+_SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI::Core::KeyEventArgs const& keyArgs)
+{
+    auto keyStatus = keyArgs.KeyStatus();
+    if (_sapp_events_enabled() && (keyStatus.ScanCode < SAPP_MAX_KEYCODES)) {
         _sapp_init_event(type);
         //_sapp.event.modifiers = _sapp_win32_mods();
-        _sapp.event.key_code = _sapp.keycodes[vk];
-        _sapp.event.key_repeat = repeat;
+        _sapp.event.key_code = _sapp.keycodes[keyStatus.ScanCode];
+        _sapp.event.key_repeat = keyStatus.RepeatCount > 1;
         _sapp_call_event(&_sapp.event);
         /* check if a CLIPBOARD_PASTED event must be sent too */
         if (_sapp.clipboard_enabled &&
@@ -5235,6 +5237,22 @@ _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, int vk, bool repea
             _sapp_call_event(&_sapp.event);
         }
     }
+}
+
+_SOKOL_PRIVATE void _sapp_uwp_toggle_fullscreen(void)
+{
+    auto appView = winrt::Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
+    _sapp.fullscreen = appView.IsFullScreenMode();
+    if (!_sapp.fullscreen)
+    {
+        appView.TryEnterFullScreenMode();
+    }
+    else
+    {
+        appView.ExitFullScreenMode();
+    }
+
+    _sapp.fullscreen = appView.IsFullScreenMode();
 }
 
 // Controls all the DirectX device resources.
@@ -6118,6 +6136,13 @@ void App::OnActivated(winrt::Windows::ApplicationModel::Core::CoreApplicationVie
 
     // Run() won't start until the CoreWindow is activated.
     winrt::Windows::UI::Core::CoreWindow::GetForCurrentThread().Activate();
+
+    if (_sapp.desc.fullscreen)
+    {
+        appView.TryEnterFullScreenMode();
+    }
+
+    _sapp.fullscreen = appView.IsFullScreenMode();
 }
 
 void App::OnSuspending(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::ApplicationModel::SuspendingEventArgs const& args)
@@ -6166,13 +6191,13 @@ void App::OnWindowClosed(winrt::Windows::UI::Core::CoreWindow const& sender, win
 void App::OnKeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
 {
     auto status = args.KeyStatus();
-    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, status.ScanCode, status.RepeatCount > 0);
+    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, args);
 }
 
 void App::OnKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
 {
     auto status = args.KeyStatus();
-    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, status.ScanCode, status.RepeatCount > 0);
+    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, args);
 }
 
 // DisplayInformation event handlers.
@@ -8766,6 +8791,8 @@ SOKOL_API_DECL void sapp_toggle_fullscreen(void) {
     _sapp_macos_toggle_fullscreen();
     #elif defined(_SAPP_WIN32)
     _sapp_win32_toggle_fullscreen();
+    #elif defined(_SAPP_UWP)
+    _sapp_uwp_toggle_fullscreen();
     #elif defined(_SAPP_LINUX)
     _sapp_x11_toggle_fullscreen();
     #endif
