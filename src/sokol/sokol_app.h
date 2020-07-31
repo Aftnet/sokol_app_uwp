@@ -6218,11 +6218,13 @@ void App::OnWindowSizeChanged(winrt::Windows::UI::Core::CoreWindow const& sender
 void App::OnVisibilityChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::VisibilityChangedEventArgs const& args)
 {
     m_windowVisible = args.Visible();
+    _sapp_win32_uwp_app_event(m_windowVisible ? SAPP_EVENTTYPE_RESTORED : SAPP_EVENTTYPE_ICONIFIED);
 }
 
 void App::OnWindowClosed(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CoreWindowEventArgs const& args)
 {
     m_windowClosed = true;
+    m_renderer.reset();
 }
 
 void App::OnKeyDown(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
