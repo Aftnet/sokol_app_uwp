@@ -5239,6 +5239,16 @@ _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI
     }
 }
 
+_SOKOL_PRIVATE void _sapp_uwp_char_event(uint32_t c, bool repeat) {
+    if (_sapp_events_enabled() && (c >= 32)) {
+        _sapp_init_event(SAPP_EVENTTYPE_CHAR);
+        //_sapp.event.modifiers = _sapp_win32_mods();
+        _sapp.event.char_code = c;
+        _sapp.event.key_repeat = repeat;
+        _sapp_call_event(&_sapp.event);
+    }
+}
+
 _SOKOL_PRIVATE void _sapp_uwp_toggle_fullscreen(void)
 {
     auto appView = winrt::Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
@@ -5395,6 +5405,7 @@ protected:
     // Input event handlers
     void OnKeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
     void OnKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
+    void OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args);
 
     // DisplayInformation event handlers.
     void OnDpiChanged(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args);
@@ -6077,6 +6088,7 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
 
     window.KeyDown({ this, &App::OnKeyDown });
     window.KeyUp({ this, &App::OnKeyUp });
+    window.CharacterReceived({ this, &App::OnCharacterReceived });
 
     auto currentDisplayInformation = winrt::Windows::Graphics::Display::DisplayInformation::GetForCurrentView();
 
@@ -6198,6 +6210,11 @@ void App::OnKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt:
 {
     auto status = args.KeyStatus();
     _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, args);
+}
+
+void App::OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args)
+{
+    _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().RepeatCount > 1);
 }
 
 // DisplayInformation event handlers.
