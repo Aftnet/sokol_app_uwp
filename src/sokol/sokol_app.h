@@ -1194,6 +1194,7 @@ inline int sapp_run(const sapp_desc& desc) { return sapp_run(&desc); }
     #include <winrt/Windows.UI.Composition.h>
     #include <winrt/Windows.UI.Input.h>
     #include <winrt/Windows.UI.ViewManagement.h>
+    #include <winrt/Windows.System.h>
     #include <ppltasks.h>
 
     #include <dxgi1_4.h>
@@ -1433,7 +1434,6 @@ typedef struct {
 #if defined(_SAPP_UWP)
 
 typedef struct {
-    uint32_t current_modifiers;
 } _sapp_uwp_t;
 
 #endif // _SAPP_UWP
@@ -5218,38 +5218,38 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 #if defined(_SAPP_UWP)
 
 // Helper functions
-_SOKOL_PRIVATE void _sapp_uwp_track_modifiers(sapp_event_type event_type, sapp_keycode key_code)
+_SOKOL_PRIVATE uint32_t _sapp_uwp_mods(winrt::Windows::UI::Core::CoreWindow const& senderWindow)
 {
-    switch (key_code)
+    uint32_t mods = 0;
+    if ((senderWindow.GetKeyState(winrt::Windows::System::VirtualKey::Shift) & winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) == winrt::Windows::UI::Core::CoreVirtualKeyStates::Down)
     {
-    case SAPP_KEYCODE_LEFT_SHIFT:
-    case SAPP_KEYCODE_RIGHT_SHIFT:
-        event_type == SAPP_EVENTTYPE_KEY_DOWN ? _sapp.uwp.current_modifiers |= SAPP_MODIFIER_SHIFT : _sapp.uwp.current_modifiers &= (~SAPP_MODIFIER_SHIFT);
-        break;
-    case SAPP_KEYCODE_LEFT_CONTROL:
-    case SAPP_KEYCODE_RIGHT_CONTROL:
-        event_type == SAPP_EVENTTYPE_KEY_DOWN ? _sapp.uwp.current_modifiers |= SAPP_MODIFIER_CTRL : _sapp.uwp.current_modifiers &= (~SAPP_MODIFIER_CTRL);
-        break;
-    case SAPP_KEYCODE_LEFT_ALT:
-    case SAPP_KEYCODE_RIGHT_ALT:
-        event_type == SAPP_EVENTTYPE_KEY_DOWN ? _sapp.uwp.current_modifiers |= SAPP_MODIFIER_ALT : _sapp.uwp.current_modifiers &= (~SAPP_MODIFIER_ALT);
-        break;
-    case SAPP_KEYCODE_LEFT_SUPER:
-    case SAPP_KEYCODE_RIGHT_SUPER:
-        event_type == SAPP_EVENTTYPE_KEY_DOWN ? _sapp.uwp.current_modifiers |= SAPP_MODIFIER_SUPER : _sapp.uwp.current_modifiers &= (~SAPP_MODIFIER_SUPER);
-        break;
+        mods |= SAPP_MODIFIER_SHIFT;
     }
+    if ((senderWindow.GetKeyState(winrt::Windows::System::VirtualKey::Control) & winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) == winrt::Windows::UI::Core::CoreVirtualKeyStates::Down)
+    {
+        mods |= SAPP_MODIFIER_CTRL;
+    }
+    if ((senderWindow.GetKeyState(winrt::Windows::System::VirtualKey::Menu) & winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) == winrt::Windows::UI::Core::CoreVirtualKeyStates::Down)
+    {
+        mods |= SAPP_MODIFIER_ALT;
+    }
+    if (((senderWindow.GetKeyState(winrt::Windows::System::VirtualKey::LeftWindows) & winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) == winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) ||
+        ((senderWindow.GetKeyState(winrt::Windows::System::VirtualKey::RightWindows) & winrt::Windows::UI::Core::CoreVirtualKeyStates::Down) == winrt::Windows::UI::Core::CoreVirtualKeyStates::Down))
+    {
+        mods |= SAPP_MODIFIER_SUPER;
+    }
+
+    return mods;
 }
 
-_SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI::Core::KeyEventArgs const& keyArgs)
+_SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI::Core::CoreWindow const& senderWindow, winrt::Windows::UI::Core::KeyEventArgs const& keyArgs)
 {
     auto key_status = keyArgs.KeyStatus();
     if (_sapp_events_enabled() && (key_status.ScanCode < SAPP_MAX_KEYCODES)) {
         _sapp_init_event(type);
+        _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
         _sapp.event.key_code = _sapp.keycodes[key_status.ScanCode];
-        _sapp_uwp_track_modifiers(type, _sapp.event.key_code);
-        _sapp.event.modifiers = _sapp.uwp.current_modifiers;
-        _sapp.event.key_repeat = key_status.RepeatCount > 1;
+        _sapp.event.key_repeat = type == SAPP_EVENTTYPE_KEY_UP ? false : key_status.RepeatCount > 1;
         _sapp_call_event(&_sapp.event);
         /* check if a CLIPBOARD_PASTED event must be sent too */
         if (_sapp.clipboard_enabled &&
@@ -5263,10 +5263,11 @@ _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI
     }
 }
 
-_SOKOL_PRIVATE void _sapp_uwp_char_event(uint32_t c, bool repeat) {
+_SOKOL_PRIVATE void _sapp_uwp_char_event(uint32_t c, bool repeat, winrt::Windows::UI::Core::CoreWindow const& senderWindow)
+{
     if (_sapp_events_enabled() && (c >= 32)) {
         _sapp_init_event(SAPP_EVENTTYPE_CHAR);
-        _sapp.event.modifiers = _sapp.uwp.current_modifiers;
+        _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
         _sapp.event.char_code = c;
         _sapp.event.key_repeat = repeat;
         _sapp_call_event(&_sapp.event);
@@ -5427,8 +5428,8 @@ protected:
     void OnWindowClosed(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CoreWindowEventArgs const& args);
 
     // Input event handlers
-    void OnKeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
-    void OnKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
+    void OnKeyDown(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
+    void OnKeyUp(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
     void OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args);
 
     // DisplayInformation event handlers.
@@ -6224,21 +6225,21 @@ void App::OnWindowClosed(winrt::Windows::UI::Core::CoreWindow const& sender, win
     m_windowClosed = true;
 }
 
-void App::OnKeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
+void App::OnKeyDown(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
 {
     auto status = args.KeyStatus();
-    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, args);
+    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_DOWN, sender, args);
 }
 
-void App::OnKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
+void App::OnKeyUp(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args)
 {
     auto status = args.KeyStatus();
-    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_UP, args);
+    _sapp_uwp_key_event(SAPP_EVENTTYPE_KEY_UP, sender, args);
 }
 
 void App::OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args)
 {
-    _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().RepeatCount > 1);
+    _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().RepeatCount > 1, sender);
 }
 
 // DisplayInformation event handlers.
