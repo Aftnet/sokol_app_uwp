@@ -6194,6 +6194,8 @@ void App::OnSuspending(winrt::Windows::Foundation::IInspectable const& sender, w
             m_deviceResources->Trim();
 
             // Insert your code here.
+            _sapp_win32_uwp_app_event(SAPP_EVENTTYPE_SUSPENDED);
+
             deferral.Complete();
         });
 }
@@ -6205,6 +6207,7 @@ void App::OnResuming(winrt::Windows::Foundation::IInspectable const& sender, win
     // does not occur if the app was previously terminated.
 
     // Insert your code here.
+    _sapp_win32_uwp_app_event(SAPP_EVENTTYPE_RESUMED);
 }
 
 // Window event handlers.
