@@ -6211,8 +6211,8 @@ void App::OnResuming(winrt::Windows::Foundation::IInspectable const& sender, win
 
 void App::OnWindowSizeChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::WindowSizeChangedEventArgs const& args)
 {
-    m_deviceResources->SetLogicalSize(winrt::Windows::Foundation::Size(sender.Bounds().Width, sender.Bounds().Height));
-    //m_main->CreateWindowSizeDependentResources();
+    m_deviceResources->SetLogicalSize(winrt::Windows::Foundation::Size(sender.Bounds().Width, sender.Bounds().Height));  
+    _sapp_win32_uwp_app_event(SAPP_EVENTTYPE_RESIZED);
 }
 
 void App::OnVisibilityChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::VisibilityChangedEventArgs const& args)
@@ -6254,13 +6254,13 @@ void App::OnDpiChanged(winrt::Windows::Graphics::Display::DisplayInformation con
     // See DeviceResources.cpp for more details.
 
     m_deviceResources->SetDpi(sender.LogicalDpi());
-    //m_main->CreateWindowSizeDependentResources();
+    _sapp_win32_uwp_app_event(SAPP_EVENTTYPE_RESIZED);
 }
 
 void App::OnOrientationChanged(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args)
 {
     m_deviceResources->SetCurrentOrientation(sender.CurrentOrientation());
-    //m_main->CreateWindowSizeDependentResources();
+    _sapp_win32_uwp_app_event(SAPP_EVENTTYPE_RESIZED);
 }
 
 void App::OnDisplayContentsInvalidated(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args)
