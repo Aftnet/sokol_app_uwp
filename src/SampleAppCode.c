@@ -170,8 +170,9 @@ void frame_handler()
 
 void event_handler(sapp_event* event)
 {
-    if (event->type == SAPP_EVENTTYPE_KEY_DOWN)
+    switch (event->type)
     {
+    case SAPP_EVENTTYPE_KEY_DOWN:
         switch (event->key_code)
         {
         case SAPP_KEYCODE_F:
@@ -196,6 +197,7 @@ void event_handler(sapp_event* event)
             sapp_request_quit();
             break;
         }
+    break;
     }
 }
 

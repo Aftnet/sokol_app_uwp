@@ -5265,6 +5265,23 @@ _SOKOL_PRIVATE void _sapp_uwp_scroll_event(float x, float y, winrt::Windows::UI:
     }
 }
 
+_SOKOL_PRIVATE void _sapp_uwp_mouse_button_event(sapp_event_type event_type, winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+    auto properties = args.CurrentPoint().Properties();
+    if (properties.IsRightButtonPressed())
+    {
+        _sapp_uwp_mouse_event(event_type, SAPP_MOUSEBUTTON_RIGHT, sender);
+    }
+    if (properties.IsLeftButtonPressed())
+    {
+        _sapp_uwp_mouse_event(event_type, SAPP_MOUSEBUTTON_MIDDLE, sender);
+    }
+    if (properties.IsMiddleButtonPressed())
+    {
+        _sapp_uwp_mouse_event(event_type, SAPP_MOUSEBUTTON_LEFT, sender);
+    }
+}
+
 _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI::Core::CoreWindow const& senderWindow, winrt::Windows::UI::Core::KeyEventArgs const& keyArgs)
 {
     auto key_status = keyArgs.KeyStatus();
@@ -6299,10 +6316,12 @@ void App::OnPointerExited(winrt::Windows::UI::Core::CoreWindow const& sender, wi
 
 void App::OnPointerPressed(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
 {
+    _sapp_uwp_mouse_button_event(SAPP_EVENTTYPE_MOUSE_DOWN, sender, args);
 }
 
 void App::OnPointerReleased(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
 {
+    _sapp_uwp_mouse_button_event(SAPP_EVENTTYPE_MOUSE_UP, sender, args);
 }
 
 void App::OnPointerMoved(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
