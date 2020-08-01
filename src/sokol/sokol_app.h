@@ -1662,7 +1662,7 @@ typedef struct {
             _sapp_wgl_t wgl;
         #endif
     #elif defined(_SAPP_UWP)
-        _sapp_uwp_t uwp;
+            _sapp_uwp_t uwp;
         #if defined(SOKOL_D3D11)
             _sapp_d3d11_t d3d11;
         #endif
