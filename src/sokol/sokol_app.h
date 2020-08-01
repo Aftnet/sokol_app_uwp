@@ -5242,6 +5242,29 @@ _SOKOL_PRIVATE uint32_t _sapp_uwp_mods(winrt::Windows::UI::Core::CoreWindow cons
     return mods;
 }
 
+_SOKOL_PRIVATE void _sapp_uwp_mouse_event(sapp_event_type type, sapp_mousebutton btn, winrt::Windows::UI::Core::CoreWindow const& senderWindow)
+{
+    if (_sapp_events_enabled()) {
+        _sapp_init_event(type);
+        _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
+        _sapp.event.mouse_button = btn;
+        _sapp.event.mouse_x = _sapp.mouse_x;
+        _sapp.event.mouse_y = _sapp.mouse_y;
+        _sapp_call_event(&_sapp.event);
+    }
+}
+
+_SOKOL_PRIVATE void _sapp_uwp_scroll_event(float x, float y, winrt::Windows::UI::Core::CoreWindow const& senderWindow)
+{
+    if (_sapp_events_enabled()) {
+        _sapp_init_event(SAPP_EVENTTYPE_MOUSE_SCROLL);
+        _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
+        _sapp.event.scroll_x = -x / 30.0f;
+        _sapp.event.scroll_y = y / 30.0f;
+        _sapp_call_event(&_sapp.event);
+    }
+}
+
 _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI::Core::CoreWindow const& senderWindow, winrt::Windows::UI::Core::KeyEventArgs const& keyArgs)
 {
     auto key_status = keyArgs.KeyStatus();
@@ -5431,6 +5454,14 @@ protected:
     void OnKeyDown(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
     void OnKeyUp(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::KeyEventArgs const& args);
     void OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args);
+
+    // Pointer event handlers
+    void OnPointerEntered(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
+    void OnPointerExited(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
+    void OnPointerPressed(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
+    void OnPointerReleased(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
+    void OnPointerMoved(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
+    void OnPointerWheelChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args);
 
     // DisplayInformation event handlers.
     void OnDpiChanged(winrt::Windows::Graphics::Display::DisplayInformation const& sender, winrt::Windows::Foundation::IInspectable const& args);
@@ -6115,6 +6146,13 @@ void App::SetWindow(winrt::Windows::UI::Core::CoreWindow const& window)
     window.KeyUp({ this, &App::OnKeyUp });
     window.CharacterReceived({ this, &App::OnCharacterReceived });
 
+    window.PointerEntered({ this, &App::OnPointerEntered });
+    window.PointerExited({ this, &App::OnPointerExited });
+    window.PointerPressed({ this, &App::OnPointerPressed });
+    window.PointerReleased({ this, &App::OnPointerReleased });
+    window.PointerMoved({ this, &App::OnPointerMoved });
+    window.PointerWheelChanged({ this, &App::OnPointerWheelChanged });
+
     auto currentDisplayInformation = winrt::Windows::Graphics::Display::DisplayInformation::GetForCurrentView();
 
     currentDisplayInformation.DpiChanged({ this, &App::OnDpiChanged });
@@ -6246,6 +6284,45 @@ void App::OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender
 {
     _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().WasKeyDown, sender);
 }
+
+void App::OnPointerEntered(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+    _sapp.win32_mouse_tracked = true;
+    _sapp_uwp_mouse_event(SAPP_EVENTTYPE_MOUSE_ENTER, SAPP_MOUSEBUTTON_INVALID, sender);
+}
+
+void App::OnPointerExited(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+    _sapp.win32_mouse_tracked = false;
+    _sapp_uwp_mouse_event(SAPP_EVENTTYPE_MOUSE_LEAVE, SAPP_MOUSEBUTTON_INVALID, sender);
+}
+
+void App::OnPointerPressed(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+}
+
+void App::OnPointerReleased(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+}
+
+void App::OnPointerMoved(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+    auto position = args.CurrentPoint().Position();
+    _sapp.mouse_x = position.X;
+    _sapp.mouse_y = position.Y;
+    if (!_sapp.win32_mouse_tracked) 
+    {
+        _sapp.win32_mouse_tracked = true;
+        _sapp_uwp_mouse_event(SAPP_EVENTTYPE_MOUSE_ENTER, SAPP_MOUSEBUTTON_INVALID, sender);
+    }
+
+    _sapp_uwp_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID, sender);
+}
+
+void App::OnPointerWheelChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
+{
+}
+
 
 // DisplayInformation event handlers.
 
