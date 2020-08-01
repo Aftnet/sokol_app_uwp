@@ -81,42 +81,42 @@
 
     FEATURE/PLATFORM MATRIX
     =======================
-                        | Windows | macOS | Linux |  iOS  | Android | Raspi | HTML5
-    --------------------+---------+-------+-------+-------+---------+-------+-------
-    gl 3.x              | YES     | YES   | YES   | ---   | ---     | ---   | ---
-    gles2/webgl         | ---     | ---   | ---   | YES   | YES     | TODO  | YES
-    gles3/webgl2        | ---     | ---   | ---   | YES   | YES     | ---   | YES
-    metal               | ---     | YES   | ---   | YES   | ---     | ---   | ---
-    d3d11               | YES     | ---   | ---   | ---   | ---     | ---   | ---
-    KEY_DOWN            | YES     | YES   | YES   | SOME  | TODO    | TODO  | YES
-    KEY_UP              | YES     | YES   | YES   | SOME  | TODO    | TODO  | YES
-    CHAR                | YES     | YES   | YES   | YES   | TODO    | TODO  | YES
-    MOUSE_DOWN          | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    MOUSE_UP            | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    MOUSE_SCROLL        | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    MOUSE_MOVE          | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    MOUSE_ENTER         | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    MOUSE_LEAVE         | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    TOUCHES_BEGAN       | ---     | ---   | ---   | YES   | YES     | ---   | YES
-    TOUCHES_MOVED       | ---     | ---   | ---   | YES   | YES     | ---   | YES
-    TOUCHES_ENDED       | ---     | ---   | ---   | YES   | YES     | ---   | YES
-    TOUCHES_CANCELLED   | ---     | ---   | ---   | YES   | YES     | ---   | YES
-    RESIZED             | YES     | YES   | YES   | YES   | YES     | ---   | YES
-    ICONIFIED           | YES     | YES   | YES   | ---   | ---     | ---   | ---
-    RESTORED            | YES     | YES   | YES   | ---   | ---     | ---   | ---
-    SUSPENDED           | ---     | ---   | ---   | YES   | YES     | ---   | TODO
-    RESUMED             | ---     | ---   | ---   | YES   | YES     | ---   | TODO
-    QUIT_REQUESTED      | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    UPDATE_CURSOR       | YES     | YES   | TODO  | ---   | ---     | ---   | TODO
-    IME                 | TODO    | TODO? | TODO  | ???   | TODO    | ???   | ???
-    key repeat flag     | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    windowed            | YES     | YES   | YES   | ---   | ---     | TODO  | YES
-    fullscreen          | YES     | YES   | YES   | YES   | YES     | TODO  | ---
-    pointer lock        | TODO    | TODO  | TODO  | ---   | ---     | TODO  | TODO
-    screen keyboard     | ---     | ---   | ---   | YES   | TODO    | ---   | YES
-    swap interval       | YES     | YES   | YES   | YES   | TODO    | TODO  | YES
-    high-dpi            | YES     | YES   | TODO  | YES   | YES     | TODO  | YES
-    clipboard           | YES     | YES   | TODO  | ---   | ---     | ---   | YES
+                        | Windows | macOS | Linux |  iOS  | Android | UWP  | Raspi | HTML5
+    --------------------+---------+-------+-------+-------+---------+------+-------+-------
+    gl 3.x              | YES     | YES   | YES   | ---   | ---     | ---  | ---   | ---
+    gles2/webgl         | ---     | ---   | ---   | YES   | YES     | ---  | TODO  | YES
+    gles3/webgl2        | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    metal               | ---     | YES   | ---   | YES   | ---     | ---  | ---   | ---
+    d3d11               | YES     | ---   | ---   | ---   | ---     | YES  | ---   | ---
+    KEY_DOWN            | YES     | YES   | YES   | SOME  | TODO    | YES  | TODO  | YES
+    KEY_UP              | YES     | YES   | YES   | SOME  | TODO    | YES  | TODO  | YES
+    CHAR                | YES     | YES   | YES   | YES   | TODO    | YES  | TODO  | YES
+    MOUSE_DOWN          | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    MOUSE_UP            | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    MOUSE_SCROLL        | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    MOUSE_MOVE          | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    MOUSE_ENTER         | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    MOUSE_LEAVE         | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
+    TOUCHES_BEGAN       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    TOUCHES_MOVED       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    TOUCHES_ENDED       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    TOUCHES_CANCELLED   | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    RESIZED             | YES     | YES   | YES   | YES   | YES     | YES  | ---   | YES
+    ICONIFIED           | YES     | YES   | YES   | ---   | ---     | YES  | ---   | ---
+    RESTORED            | YES     | YES   | YES   | ---   | ---     | YES  | ---   | ---
+    SUSPENDED           | ---     | ---   | ---   | YES   | YES     | YES  | ---   | TODO
+    RESUMED             | ---     | ---   | ---   | YES   | YES     | YES  | ---   | TODO
+    QUIT_REQUESTED      | YES     | YES   | YES   | ---   | ---     | ---  | TODO  | YES
+    UPDATE_CURSOR       | YES     | YES   | TODO  | ---   | ---     | ---  | ---   | TODO
+    IME                 | TODO    | TODO? | TODO  | ???   | TODO    | ---  | ???   | ???
+    key repeat flag     | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    windowed            | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    fullscreen          | YES     | YES   | YES   | YES   | YES     | YES  | TODO  | ---
+    pointer lock        | TODO    | TODO  | TODO  | ---   | ---     | ---  | TODO  | TODO
+    screen keyboard     | ---     | ---   | ---   | YES   | TODO    | ---  | ---   | YES
+    swap interval       | YES     | YES   | YES   | YES   | TODO    | ---  | TODO  | YES
+    high-dpi            | YES     | YES   | TODO  | YES   | YES     | YES  | TODO  | YES
+    clipboard           | YES     | YES   | TODO  | ---   | ---     | TODO | ---   | YES
 
     TODO
     ====
