@@ -5249,7 +5249,7 @@ _SOKOL_PRIVATE void _sapp_uwp_key_event(sapp_event_type type, winrt::Windows::UI
         _sapp_init_event(type);
         _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
         _sapp.event.key_code = _sapp.keycodes[key_status.ScanCode];
-        _sapp.event.key_repeat = type == SAPP_EVENTTYPE_KEY_UP ? false : key_status.RepeatCount > 1;
+        _sapp.event.key_repeat = type == SAPP_EVENTTYPE_KEY_UP ? false : key_status.WasKeyDown;
         _sapp_call_event(&_sapp.event);
         /* check if a CLIPBOARD_PASTED event must be sent too */
         if (_sapp.clipboard_enabled &&
@@ -6244,7 +6244,7 @@ void App::OnKeyUp(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Win
 
 void App::OnCharacterReceived(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::CharacterReceivedEventArgs const& args)
 {
-    _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().RepeatCount > 1, sender);
+    _sapp_uwp_char_event(args.KeyCode(), args.KeyStatus().WasKeyDown, sender);
 }
 
 // DisplayInformation event handlers.
