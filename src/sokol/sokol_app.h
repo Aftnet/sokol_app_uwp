@@ -91,29 +91,29 @@
     KEY_DOWN            | YES     | YES   | YES   | SOME  | TODO    | YES  | TODO  | YES
     KEY_UP              | YES     | YES   | YES   | SOME  | TODO    | YES  | TODO  | YES
     CHAR                | YES     | YES   | YES   | YES   | TODO    | YES  | TODO  | YES
-    MOUSE_DOWN          | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    MOUSE_UP            | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    MOUSE_SCROLL        | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    MOUSE_MOVE          | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    MOUSE_ENTER         | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    MOUSE_LEAVE         | YES     | YES   | YES   | ---   | ---     | TODO | TODO  | YES
-    TOUCHES_BEGAN       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
-    TOUCHES_MOVED       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
-    TOUCHES_ENDED       | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
-    TOUCHES_CANCELLED   | ---     | ---   | ---   | YES   | YES     | ---  | ---   | YES
+    MOUSE_DOWN          | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    MOUSE_UP            | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    MOUSE_SCROLL        | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    MOUSE_MOVE          | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    MOUSE_ENTER         | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    MOUSE_LEAVE         | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
+    TOUCHES_BEGAN       | ---     | ---   | ---   | YES   | YES     | TODO | ---   | YES
+    TOUCHES_MOVED       | ---     | ---   | ---   | YES   | YES     | TODO | ---   | YES
+    TOUCHES_ENDED       | ---     | ---   | ---   | YES   | YES     | TODO | ---   | YES
+    TOUCHES_CANCELLED   | ---     | ---   | ---   | YES   | YES     | TODO | ---   | YES
     RESIZED             | YES     | YES   | YES   | YES   | YES     | YES  | ---   | YES
     ICONIFIED           | YES     | YES   | YES   | ---   | ---     | YES  | ---   | ---
     RESTORED            | YES     | YES   | YES   | ---   | ---     | YES  | ---   | ---
     SUSPENDED           | ---     | ---   | ---   | YES   | YES     | YES  | ---   | TODO
     RESUMED             | ---     | ---   | ---   | YES   | YES     | YES  | ---   | TODO
     QUIT_REQUESTED      | YES     | YES   | YES   | ---   | ---     | ---  | TODO  | YES
-    UPDATE_CURSOR       | YES     | YES   | TODO  | ---   | ---     | ---  | ---   | TODO
+    UPDATE_CURSOR       | YES     | YES   | TODO  | ---   | ---     | TODO | ---   | TODO
     IME                 | TODO    | TODO? | TODO  | ???   | TODO    | ---  | ???   | ???
     key repeat flag     | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
     windowed            | YES     | YES   | YES   | ---   | ---     | YES  | TODO  | YES
     fullscreen          | YES     | YES   | YES   | YES   | YES     | YES  | TODO  | ---
     pointer lock        | TODO    | TODO  | TODO  | ---   | ---     | ---  | TODO  | TODO
-    screen keyboard     | ---     | ---   | ---   | YES   | TODO    | ---  | ---   | YES
+    screen keyboard     | ---     | ---   | ---   | YES   | TODO    | TODO | ---   | YES
     swap interval       | YES     | YES   | YES   | YES   | TODO    | ---  | TODO  | YES
     high-dpi            | YES     | YES   | TODO  | YES   | YES     | YES  | TODO  | YES
     clipboard           | YES     | YES   | TODO  | ---   | ---     | TODO | ---   | YES
@@ -5254,13 +5254,13 @@ _SOKOL_PRIVATE void _sapp_uwp_mouse_event(sapp_event_type type, sapp_mousebutton
     }
 }
 
-_SOKOL_PRIVATE void _sapp_uwp_scroll_event(float x, float y, winrt::Windows::UI::Core::CoreWindow const& senderWindow)
+_SOKOL_PRIVATE void _sapp_uwp_scroll_event(float delta, bool horizontal, winrt::Windows::UI::Core::CoreWindow const& senderWindow)
 {
     if (_sapp_events_enabled()) {
         _sapp_init_event(SAPP_EVENTTYPE_MOUSE_SCROLL);
         _sapp.event.modifiers = _sapp_uwp_mods(senderWindow);
-        _sapp.event.scroll_x = -x / 30.0f;
-        _sapp.event.scroll_y = y / 30.0f;
+        _sapp.event.scroll_x = horizontal ? (-delta / 30.0f) : 0.0f;
+        _sapp.event.scroll_y = horizontal ? 0.0f : (delta / 30.0f);
         _sapp_call_event(&_sapp.event);
     }
 }
@@ -6323,6 +6323,8 @@ namespace /* Empty namespace to ensure internal linkage (same as _SOKOL_PRIVATE)
 
     void App::OnPointerWheelChanged(winrt::Windows::UI::Core::CoreWindow const& sender, winrt::Windows::UI::Core::PointerEventArgs const& args)
     {
+        auto properties = args.CurrentPoint().Properties();
+        _sapp_uwp_scroll_event(properties.MouseWheelDelta(), properties.IsHorizontalMouseWheel(), sender);
     }
 
 
